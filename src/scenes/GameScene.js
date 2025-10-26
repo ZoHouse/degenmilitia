@@ -206,13 +206,10 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.existing(ground, true);
     this.platforms.add(ground);
     
-    // Simple floating platforms
+    // Just 2 simple platforms for testing - lots of open space!
     const platformData = [
-      { x: width * 0.15, y: height * 0.7, w: 180 },
-      { x: width * 0.35, y: height * 0.55, w: 140 },
-      { x: width * 0.55, y: height * 0.45, w: 200 },
-      { x: width * 0.75, y: height * 0.6, w: 160 },
-      { x: width * 0.9, y: height * 0.75, w: 120 },
+      { x: width * 0.3, y: height * 0.6, w: 200 },
+      { x: width * 0.7, y: height * 0.6, w: 200 },
     ];
     
     platformData.forEach(p => {
