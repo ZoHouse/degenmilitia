@@ -111,6 +111,10 @@ export class GameScene extends Phaser.Scene {
     // Check if animations already exist to avoid duplicates
     if (this.anims.exists('idle_right')) return;
     
+    // The sprite sheet only has 4 frames (0-3), so we'll reuse them
+    // Frame 0-1: Idle/Standing
+    // Frame 2-3: Walking/Jetpack
+    
     // Idle animation (right)
     this.anims.create({
       key: 'idle_right',
@@ -127,10 +131,10 @@ export class GameScene extends Phaser.Scene {
       repeat: -1
     });
     
-    // Jetpack animation (right)
+    // Jetpack animation (right) - use all frames for movement
     this.anims.create({
       key: 'jetpack_right',
-      frames: this.anims.generateFrameNumbers('player_right', { start: 4, end: 7 }),
+      frames: this.anims.generateFrameNumbers('player_right', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1
     });
@@ -151,10 +155,10 @@ export class GameScene extends Phaser.Scene {
       repeat: -1
     });
     
-    // Jetpack animation (left)
+    // Jetpack animation (left) - use all frames for movement
     this.anims.create({
       key: 'jetpack_left',
-      frames: this.anims.generateFrameNumbers('player_left', { start: 4, end: 7 }),
+      frames: this.anims.generateFrameNumbers('player_left', { start: 0, end: 3 }),
       frameRate: 10,
       repeat: -1
     });
