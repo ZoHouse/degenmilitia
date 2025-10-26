@@ -3,7 +3,7 @@
  * Uses Supabase Realtime for WebSocket communication
  */
 
-import { supabase } from '../config/supabase.js';
+import { getSupabaseClient } from '../config/supabase.js';
 
 export class MultiplayerService {
   constructor(roomCode, playerId, playerName) {
@@ -24,6 +24,12 @@ export class MultiplayerService {
    * Connect to multiplayer room
    */
   connect() {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+      console.error('Supabase client not initialized');
+      return this;
+    }
+
     // Create a channel for this room
     this.channel = supabase.channel(`game:${this.roomCode}`, {
       config: {
