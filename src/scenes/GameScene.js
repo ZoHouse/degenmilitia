@@ -11,19 +11,19 @@ export class GameScene extends Phaser.Scene {
   }
   
   preload() {
-    // Load Mini Militia sprites (Vite handles the path resolution)
-    this.load.image('background', new URL('../assets/maps/background.png', import.meta.url).href);
-    this.load.spritesheet('player_right', new URL('../assets/sprites/character_sprite1_right.png', import.meta.url).href, {
+    // Load Mini Militia sprites from public folder
+    this.load.image('background', '/assets/maps/background.png');
+    this.load.spritesheet('player_right', '/assets/sprites/character_sprite1_right.png', {
       frameWidth: 128,
       frameHeight: 128
     });
-    this.load.spritesheet('player_left', new URL('../assets/sprites/character_sprite1_left.png', import.meta.url).href, {
+    this.load.spritesheet('player_left', '/assets/sprites/character_sprite1_left.png', {
       frameWidth: 128,
       frameHeight: 128
     });
-    this.load.image('grass', new URL('../assets/sprites/grass.png', import.meta.url).href);
-    this.load.image('sand', new URL('../assets/sprites/sand.png', import.meta.url).href);
-    this.load.image('stones', new URL('../assets/sprites/big_stones.png', import.meta.url).href);
+    this.load.image('grass', '/assets/sprites/grass.png');
+    this.load.image('sand', '/assets/sprites/sand.png');
+    this.load.image('stones', '/assets/sprites/big_stones.png');
   }
   
   init(data) {
