@@ -10,6 +10,22 @@ export class GameScene extends Phaser.Scene {
     super('GameScene');
   }
   
+  preload() {
+    // Load Mini Militia sprites
+    this.load.image('background', '/src/assets/maps/background.png');
+    this.load.spritesheet('player_right', '/src/assets/sprites/character_sprite1_right.png', {
+      frameWidth: 128,
+      frameHeight: 128
+    });
+    this.load.spritesheet('player_left', '/src/assets/sprites/character_sprite1_left.png', {
+      frameWidth: 128,
+      frameHeight: 128
+    });
+    this.load.image('grass', '/src/assets/sprites/grass.png');
+    this.load.image('sand', '/src/assets/sprites/sand.png');
+    this.load.image('stones', '/src/assets/sprites/big_stones.png');
+  }
+  
   init(data) {
     this.roomCode = data.roomCode;
     this.isHost = data.isHost;
@@ -21,16 +37,10 @@ export class GameScene extends Phaser.Scene {
     const width = this.scale.width;
     const height = this.scale.height;
     
-    // Mario-style sky background (gradient)
-    const sky = this.add.graphics();
-    sky.fillGradientStyle(0x5c94fc, 0x5c94fc, 0x78b9ff, 0x78b9ff, 1);
-    sky.fillRect(0, 0, width * 2, height);
-    
-    // Add clouds
-    this.createClouds(width, height);
-    
-    // Add background hills
-    this.createHills(width, height);
+    // Mini Militia background
+    const bg = this.add.image(width / 2, height / 2, 'background');
+    bg.setDisplaySize(width, height);
+    bg.setScrollFactor(0.3); // Parallax effect
     
     // Compact room code display (top-left)
     const roomCodeBg = this.add.graphics();
@@ -58,10 +68,10 @@ export class GameScene extends Phaser.Scene {
     const safeMarginTop = 60;
     this.add.text(width / 2, safeMarginTop, 'DEGEN MILITIA', {
       fontSize: '20px',
-      fill: '#FFD700',
+      fill: '#000000',
       fontStyle: 'bold',
-      stroke: '#FF6B00',
-      strokeThickness: 4
+      stroke: '#FFFFFF',
+      strokeThickness: 3
     }).setOrigin(0.5).setScrollFactor(0).setDepth(999);
     
     // Game state
@@ -69,10 +79,14 @@ export class GameScene extends Phaser.Scene {
     this.health = 100;
     this.kills = 0;
     this.lastShot = 0;
+    this.playerDirection = 'right'; // Track player direction
     
     // Create world
     this.createPlatforms(width, height);
     this.createPlayer(width, height);
+    
+    // Create animations
+    this.createAnimations();
     
     // Bullets
     this.bullets = this.physics.add.group({ maxSize: 50 });
@@ -109,179 +123,113 @@ export class GameScene extends Phaser.Scene {
     this.createHUD(width, height, safeMarginTop);
   }
   
-  createClouds(width, height) {
-    const clouds = [
-      { x: width * 0.15, y: height * 0.15 },
-      { x: width * 0.45, y: height * 0.22 },
-      { x: width * 0.75, y: height * 0.18 },
-      { x: width * 1.2, y: height * 0.2 },
-    ];
-    
-    clouds.forEach(cloud => {
-      // White fluffy cloud
-      const cloudGroup = this.add.graphics();
-      cloudGroup.fillStyle(0xffffff, 0.9);
-      cloudGroup.fillCircle(cloud.x, cloud.y, 25);
-      cloudGroup.fillCircle(cloud.x + 20, cloud.y, 30);
-      cloudGroup.fillCircle(cloud.x + 45, cloud.y, 25);
-      cloudGroup.fillCircle(cloud.x + 25, cloud.y - 15, 22);
+  createAnimations() {
+    // Idle animation (right)
+    this.anims.create({
+      key: 'idle_right',
+      frames: this.anims.generateFrameNumbers('player_right', { frames: [0, 1] }),
+      frameRate: 4,
+      repeat: -1
     });
-  }
-  
-  createHills(width, height) {
-    const hills = [
-      { x: width * 0.25, y: height - 80, w: 200, h: 120, color: 0x4ade80 },
-      { x: width * 0.65, y: height - 80, w: 250, h: 100, color: 0x22c55e },
-      { x: width * 1.15, y: height - 80, w: 180, h: 110, color: 0x4ade80 },
-    ];
     
-    hills.forEach(hill => {
-      const hillGraphic = this.add.graphics();
-      hillGraphic.fillStyle(hill.color, 1);
-      hillGraphic.fillEllipse(hill.x, hill.y, hill.w, hill.h);
+    // Walk animation (right)
+    this.anims.create({
+      key: 'walk_right',
+      frames: this.anims.generateFrameNumbers('player_right', { frames: [2, 3] }),
+      frameRate: 8,
+      repeat: -1
+    });
+    
+    // Jetpack animation (right)
+    this.anims.create({
+      key: 'jetpack_right',
+      frames: this.anims.generateFrameNumbers('player_right', { frames: [4, 5, 6, 7] }),
+      frameRate: 10,
+      repeat: -1
+    });
+    
+    // Idle animation (left)
+    this.anims.create({
+      key: 'idle_left',
+      frames: this.anims.generateFrameNumbers('player_left', { frames: [0, 1] }),
+      frameRate: 4,
+      repeat: -1
+    });
+    
+    // Walk animation (left)
+    this.anims.create({
+      key: 'walk_left',
+      frames: this.anims.generateFrameNumbers('player_left', { frames: [2, 3] }),
+      frameRate: 8,
+      repeat: -1
+    });
+    
+    // Jetpack animation (left)
+    this.anims.create({
+      key: 'jetpack_left',
+      frames: this.anims.generateFrameNumbers('player_left', { frames: [4, 5, 6, 7] }),
+      frameRate: 10,
+      repeat: -1
     });
   }
   
   createPlatforms(width, height) {
     this.platforms = this.physics.add.staticGroup();
     
-    // Ground with grass on top (Mario-style)
-    const groundHeight = 80;
+    // Ground - use sand texture for bottom, grass on top
     const groundY = height - 40;
+    const groundHeight = 80;
     
-    // Brown dirt base
-    const groundBase = this.add.graphics();
-    groundBase.fillStyle(0xc2410c, 1);
-    groundBase.fillRect(0, groundY, width, groundHeight);
+    // Add sand texture at bottom
+    const sandTile = this.add.tileSprite(width / 2, groundY + 20, width, 60, 'sand');
     
-    // Green grass top
-    const grass = this.add.graphics();
-    grass.fillStyle(0x10b981, 1);
-    grass.fillRect(0, groundY - 15, width, 15);
+    // Add grass on top
+    const grassTop = this.add.tileSprite(width / 2, groundY - 10, width, 30, 'grass');
     
-    // Add grass texture (small triangles)
-    for (let i = 0; i < width; i += 20) {
-      grass.fillStyle(0x059669, 1);
-      grass.fillTriangle(i, groundY - 15, i + 5, groundY - 20, i + 10, groundY - 15);
-    }
-    
-    const ground = this.add.rectangle(width / 2, height - 40, width, groundHeight, 0xc2410c, 0);
+    // Physics body for ground
+    const ground = this.add.rectangle(width / 2, height - 40, width, groundHeight, 0x000000, 0);
     this.physics.add.existing(ground, true);
     this.platforms.add(ground);
     
-    // Floating platforms (Mario-style bricks)
+    // Floating platforms using grass and stone textures
     const platformData = [
-      { x: width * 0.15, y: height * 0.7, w: 180, type: 'brick' },
-      { x: width * 0.35, y: height * 0.55, w: 140, type: 'grass' },
-      { x: width * 0.55, y: height * 0.45, w: 200, type: 'brick' },
-      { x: width * 0.75, y: height * 0.6, w: 160, type: 'grass' },
-      { x: width * 0.9, y: height * 0.75, w: 120, type: 'brick' },
+      { x: width * 0.15, y: height * 0.7, w: 180, type: 'grass' },
+      { x: width * 0.35, y: height * 0.55, w: 140, type: 'stone' },
+      { x: width * 0.55, y: height * 0.45, w: 200, type: 'grass' },
+      { x: width * 0.75, y: height * 0.6, w: 160, type: 'stone' },
+      { x: width * 0.9, y: height * 0.75, w: 120, type: 'grass' },
     ];
     
     platformData.forEach(p => {
-      if (p.type === 'brick') {
-        this.createBrickPlatform(p.x, p.y, p.w);
-      } else {
-        this.createGrassPlatform(p.x, p.y, p.w);
-      }
+      this.createTexturedPlatform(p.x, p.y, p.w, p.type);
     });
   }
   
-  createBrickPlatform(x, y, width) {
-    const platformHeight = 28;
-    const brickWidth = 35;
-    const numBricks = Math.floor(width / brickWidth);
+  createTexturedPlatform(x, y, width, type) {
+    const platformHeight = 30;
     
-    const container = this.add.container(x, y);
-    
-    for (let i = 0; i < numBricks; i++) {
-      const brickX = (i - numBricks / 2) * brickWidth + brickWidth / 2;
-      
-      // Brick body (orange/brown)
-      const brick = this.add.graphics();
-      brick.fillStyle(0xfb923c, 1);
-      brick.fillRoundedRect(brickX - brickWidth/2, -platformHeight/2, brickWidth - 2, platformHeight, 3);
-      
-      // Brick outline
-      brick.lineStyle(2, 0xc2410c, 1);
-      brick.strokeRoundedRect(brickX - brickWidth/2, -platformHeight/2, brickWidth - 2, platformHeight, 3);
-      
-      // Brick details (lines)
-      brick.lineStyle(1, 0xc2410c, 0.5);
-      brick.lineBetween(brickX - brickWidth/2 + 5, -platformHeight/2 + platformHeight/2, 
-                       brickX + brickWidth/2 - 5, -platformHeight/2 + platformHeight/2);
-      
-      container.add(brick);
-    }
+    // Create platform with texture
+    const texture = type === 'grass' ? 'grass' : 'stones';
+    const platform = this.add.tileSprite(x, y, width, platformHeight, texture);
     
     // Physics body
-    const platform = this.add.rectangle(x, y, width, platformHeight, 0xfb923c, 0);
-    this.physics.add.existing(platform, true);
-    this.platforms.add(platform);
-  }
-  
-  createGrassPlatform(x, y, width) {
-    const platformHeight = 28;
-    
-    // Green grass platform
-    const platform = this.add.graphics();
-    
-    // Brown base
-    platform.fillStyle(0x92400e, 1);
-    platform.fillRoundedRect(x - width/2, y - platformHeight/2 + 8, width, platformHeight - 8, 4);
-    
-    // Green grass top
-    platform.fillStyle(0x10b981, 1);
-    platform.fillRoundedRect(x - width/2, y - platformHeight/2, width, 12, 4);
-    
-    // Grass texture
-    for (let i = x - width/2; i < x + width/2; i += 15) {
-      platform.fillStyle(0x059669, 1);
-      platform.fillTriangle(i, y - platformHeight/2, i + 4, y - platformHeight/2 - 5, i + 8, y - platformHeight/2);
-    }
-    
-    // Outline
-    platform.lineStyle(2, 0x065f46, 1);
-    platform.strokeRoundedRect(x - width/2, y - platformHeight/2, width, platformHeight, 4);
-    
-    // Physics body
-    const physicsBody = this.add.rectangle(x, y, width, platformHeight, 0x10b981, 0);
+    const physicsBody = this.add.rectangle(x, y, width, platformHeight, 0x000000, 0);
     this.physics.add.existing(physicsBody, true);
     this.platforms.add(physicsBody);
   }
   
   createPlayer(width, height) {
-    // Create a Mario-style character
-    const playerContainer = this.add.container(width / 2, height / 2);
+    // Create player sprite using Mini Militia character
+    this.player = this.physics.add.sprite(width / 2, height / 2, 'player_right');
+    this.player.setScale(0.5); // Scale down to appropriate size
+    this.player.setCollideWorldBounds(true);
+    this.player.setBounce(0.1);
+    this.player.body.setSize(60, 80); // Adjust collision box
     
-    // Body (red shirt)
-    const body = this.add.rectangle(0, 5, 28, 35, 0xef4444);
+    // Play idle animation
+    this.player.play('idle_right');
     
-    // Head (peach skin color)
-    const head = this.add.circle(0, -15, 12, 0xfcd34d);
-    
-    // Eyes
-    const leftEye = this.add.circle(-4, -15, 2, 0x000000);
-    const rightEye = this.add.circle(4, -15, 2, 0x000000);
-    
-    // Cap (blue)
-    const cap = this.add.ellipse(0, -22, 20, 12, 0x3b82f6);
-    
-    // Overalls (blue pants)
-    const legs = this.add.rectangle(0, 20, 24, 15, 0x2563eb);
-    
-    // Shoes (brown)
-    const leftShoe = this.add.ellipse(-8, 28, 12, 8, 0x92400e);
-    const rightShoe = this.add.ellipse(8, 28, 12, 8, 0x92400e);
-    
-    playerContainer.add([cap, head, leftEye, rightEye, body, legs, leftShoe, rightShoe]);
-    
-    // Add physics to container
-    this.player = playerContainer;
-    this.physics.add.existing(this.player);
-    this.player.body.setSize(28, 50);
-    this.player.body.setCollideWorldBounds(true);
-    this.player.body.setBounce(0.1);
+    // Add collision with platforms
     this.physics.add.collider(this.player, this.platforms);
   }
   
@@ -346,19 +294,28 @@ export class GameScene extends Phaser.Scene {
     // Movement
     this.player.body.setVelocityX(moveX * 300);
     
+    // Update player direction
+    if (moveX > 0) this.playerDirection = 'right';
+    else if (moveX < 0) this.playerDirection = 'left';
+    
     // Jetpack
-    if (jetpack && this.jetpackFuel > 0) {
+    const isJetpacking = jetpack && this.jetpackFuel > 0;
+    if (isJetpacking) {
       this.player.body.setVelocityY(-400);
       this.jetpackFuel -= 1.5;
       
+      // Jetpack animation
+      const jetpackAnim = this.playerDirection === 'right' ? 'jetpack_right' : 'jetpack_left';
+      if (this.player.anims.currentAnim?.key !== jetpackAnim) {
+        this.player.play(jetpackAnim);
+      }
+      
+      // Jetpack particles (orange fire)
       if (Math.random() > 0.6) {
-        // More colorful jetpack fire (orange-yellow gradient effect)
-        const colors = [0xff6b00, 0xfbbf24, 0xef4444];
-        const color = colors[Math.floor(Math.random() * colors.length)];
         const particle = this.add.circle(
           this.player.x + Phaser.Math.Between(-10, 10),
-          this.player.y + 25,
-          Phaser.Math.Between(3, 6), color
+          this.player.y + 30,
+          Phaser.Math.Between(3, 6), 0xff6600
         );
         this.tweens.add({
           targets: particle,
@@ -370,8 +327,23 @@ export class GameScene extends Phaser.Scene {
           onComplete: () => particle.destroy()
         });
       }
-    } else if (!jetpack && this.jetpackFuel < 100) {
-      this.jetpackFuel += 0.8;
+    } else {
+      // Walking or idle animation
+      if (moveX !== 0) {
+        const walkAnim = this.playerDirection === 'right' ? 'walk_right' : 'walk_left';
+        if (this.player.anims.currentAnim?.key !== walkAnim) {
+          this.player.play(walkAnim);
+        }
+      } else {
+        const idleAnim = this.playerDirection === 'right' ? 'idle_right' : 'idle_left';
+        if (this.player.anims.currentAnim?.key !== idleAnim) {
+          this.player.play(idleAnim);
+        }
+      }
+      
+      if (this.jetpackFuel < 100) {
+        this.jetpackFuel += 0.8;
+      }
     }
     
     // Shooting
@@ -422,18 +394,8 @@ export class GameScene extends Phaser.Scene {
     if (now - this.lastShot < 200) return;
     this.lastShot = now;
     
-    // Create a Mario-style fireball
-    const bullet = this.add.graphics();
-    bullet.fillStyle(0xff6b00, 1);
-    bullet.fillCircle(0, 0, 8);
-    bullet.lineStyle(2, 0xfbbf24, 1);
-    bullet.strokeCircle(0, 0, 8);
-    bullet.fillStyle(0xfef08a, 1);
-    bullet.fillCircle(-2, -2, 3);
-    
-    bullet.x = this.player.x;
-    bullet.y = this.player.y;
-    
+    // Simple bullet (Mini Militia style)
+    const bullet = this.add.circle(this.player.x, this.player.y, 5, 0xffff00);
     this.physics.add.existing(bullet);
     this.bullets.add(bullet);
     
@@ -442,14 +404,6 @@ export class GameScene extends Phaser.Scene {
       Math.cos(angle) * speed,
       Math.sin(angle) * speed
     );
-    
-    // Add rotation for fireball effect
-    this.tweens.add({
-      targets: bullet,
-      rotation: Math.PI * 4,
-      duration: 1000,
-      repeat: -1
-    });
     
     this.time.delayedCall(2500, () => {
       if (bullet && bullet.active) bullet.destroy();
