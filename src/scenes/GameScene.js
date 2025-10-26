@@ -156,10 +156,19 @@ export class GameScene extends Phaser.Scene {
   createOtherPlayer(playerId, playerName) {
     if (this.otherPlayerSprites.has(playerId)) return;
     
-    // Create player sprite (different color from main player)
-    const sprite = this.add.rectangle(100, 100, 30, 50, 0xff6b6b);
+    // Random emoji for other players
+    const emojis = ['🦊', '🐼', '🐸', '🦁', '🐯', '🐻', '🐨', '🐮'];
+    const randomEmoji = emojis[Math.floor(Math.random() * emojis.length)];
+    
+    // Create player sprite as emoji text
+    const sprite = this.add.text(100, 100, randomEmoji, {
+      fontSize: '40px'
+    }).setOrigin(0.5);
+    
     this.physics.add.existing(sprite);
     sprite.body.setCollideWorldBounds(true);
+    sprite.body.setSize(30, 40); // Hitbox size
+    sprite.body.setOffset(5, 5); // Center the hitbox
     
     // Add name label
     const nameLabel = this.add.text(0, -35, playerName, {
@@ -299,11 +308,16 @@ export class GameScene extends Phaser.Scene {
   }
   
   createPlayer(width, height) {
-    // Simple player shape
-    this.player = this.add.rectangle(width / 2, height / 2, 30, 50, 0x00d9ff);
+    // Main player as emoji
+    this.player = this.add.text(width / 2, height / 2, '🤠', {
+      fontSize: '40px'
+    }).setOrigin(0.5);
+    
     this.physics.add.existing(this.player);
     this.player.body.setCollideWorldBounds(true);
     this.player.body.setBounce(0.1);
+    this.player.body.setSize(30, 40); // Hitbox size
+    this.player.body.setOffset(5, 5); // Center the hitbox
     
     // Add collision with platforms
     this.physics.add.collider(this.player, this.platforms);
