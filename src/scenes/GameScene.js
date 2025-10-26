@@ -91,13 +91,10 @@ export class GameScene extends Phaser.Scene {
     // Bullets
     this.bullets = this.physics.add.group({ maxSize: 50 });
     
-    // Controls
-    const isMobile = /Android|webOS|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) {
-      this.controls = new DualJoystickControls(this);
-    }
+    // Controls - ALWAYS show mobile controls (can use on desktop too!)
+    this.controls = new DualJoystickControls(this);
     
-    // Desktop fallback
+    // Desktop keyboard fallback (works alongside mobile controls)
     this.cursors = this.input.keyboard.createCursorKeys();
     this.wasd = {
       up: this.input.keyboard.addKey('W'),
@@ -105,19 +102,6 @@ export class GameScene extends Phaser.Scene {
       right: this.input.keyboard.addKey('D'),
       space: this.input.keyboard.addKey('SPACE')
     };
-    
-    if (!isMobile) {
-      this.input.on('pointerdown', (pointer) => {
-        if (pointer.leftButtonDown()) {
-          const angle = Phaser.Math.Angle.Between(
-            this.player.x, this.player.y,
-            pointer.x + this.cameras.main.scrollX,
-            pointer.y + this.cameras.main.scrollY
-          );
-          this.shootBullet(angle);
-        }
-      });
-    }
     
     // HUD
     this.createHUD(width, height, safeMarginTop);
@@ -273,21 +257,27 @@ export class GameScene extends Phaser.Scene {
   update() {
     if (!this.player) return;
     
-    // Get input
+    // Get input from mobile controls (priority) OR keyboard
     let moveX = 0;
     let jetpack = false;
     let shooting = false;
     let shootAngle = 0;
     
+    // Mobile controls (joysticks)
     if (this.controls) {
       const input = this.controls.getInput();
       moveX = input.moveX;
       jetpack = input.jetpack;
       shooting = input.shooting;
       shootAngle = input.shootAngle;
-    } else {
+    }
+    
+    // Keyboard fallback (if mobile controls not active)
+    if (moveX === 0) {
       if (this.cursors.left.isDown || this.wasd.left.isDown) moveX = -1;
       if (this.cursors.right.isDown || this.wasd.right.isDown) moveX = 1;
+    }
+    if (!jetpack) {
       jetpack = this.cursors.up.isDown || this.wasd.space.isDown || this.wasd.up.isDown;
     }
     
