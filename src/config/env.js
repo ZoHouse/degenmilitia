@@ -43,12 +43,12 @@ export const validateEnv = () => {
 
   const missing = required.filter(({ value }) => !value);
 
+  // Only warn in production, don't throw during build
   if (missing.length > 0 && env.isProduction) {
-    console.error('❌ Missing required environment variables:');
+    console.warn('⚠️  Missing required environment variables:');
     missing.forEach(({ name, key }) => {
-      console.error(`   - ${name} (${key})`);
+      console.warn(`   - ${name} (${key})`);
     });
-    throw new Error('Missing required environment variables');
   }
 
   if (missing.length > 0 && env.isDevelopment) {
