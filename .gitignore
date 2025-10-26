@@ -1,0 +1,70 @@
+# Degen Militia - Git Ignore
+
+# APK Files
+*.apk
+*.apks
+
+# Android Files
+original-apk/
+unpacked/
+signed-apk/
+backups/
+assets-custom/
+
+# Keystore files (NEVER commit these!)
+*.keystore
+*.jks
+
+# Build artifacts
+*.dex
+*.class
+*.jar
+!apktool.jar
+
+# Binary backups
+*.so.backup
+*.backup
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment files
+degen-env.sh
+.env
+
+# Logs
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Windows
+ehthumbs.db
+Desktop.ini
+
+# macOS
+.AppleDouble
+.LSOverride
+Icon
+
+# Tools directory (users download their own)
+degen-militia-tools/
+
+# Output files
+*.unsigned.apk
+output.apk
+
+# Custom user assets (keep structure but ignore content)
+# Users will add their own custom assets
+

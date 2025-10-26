@@ -1,0 +1,22 @@
+{
+  "name": "Degen Militia",
+  "short_name": "DegenMilitia",
+  "description": "Multiplayer 2D Shooter - Mobile PWA Game",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#10002B",
+  "theme_color": "#9D4EDD",
+  "orientation": "landscape-primary",
+  "scope": "/",
+  "categories": ["games", "entertainment"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+

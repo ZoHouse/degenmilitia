@@ -1,0 +1,34 @@
+{
+  "name": "degen-militia-pwa",
+  "version": "1.0.0",
+  "description": "Multiplayer 2D shooter PWA inspired by Mini Militia",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:env": "node scripts/test-env.js",
+    "setup:db": "node scripts/setup-database.js"
+  },
+  "keywords": [
+    "game",
+    "pwa",
+    "phaser",
+    "multiplayer"
+  ],
+  "author": "Degen Dev",
+  "license": "MIT",
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "phaser": "^3.90.0",
+    "vite": "^7.1.12"
+  },
+  "dependencies": {
+    "@privy-io/react-auth": "^3.4.1",
+    "@supabase/supabase-js": "^2.76.1",
+    "dotenv": "^17.2.3",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  }
+}
