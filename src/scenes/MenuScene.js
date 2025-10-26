@@ -23,57 +23,70 @@ export class MenuScene extends Phaser.Scene {
     // Background
     this.add.rectangle(width / 2, height / 2, width, height, 0x10002B);
     
-    // Logo/Title (landscape optimized)
-    this.add.text(width / 2, height * 0.2, 'DEGEN MILITIA', {
-      fontSize: '48px',
+    // Responsive sizing based on screen width
+    const isMobile = width < 900;
+    const titleSize = isMobile ? '36px' : '48px';
+    const subtitleSize = isMobile ? '14px' : '18px';
+    
+    // Logo/Title (responsive positioning)
+    this.add.text(width / 2, height * 0.25, 'DEGEN MILITIA', {
+      fontSize: titleSize,
       fill: '#9D4EDD',
       fontStyle: 'bold',
       stroke: '#7B2CBF',
-      strokeThickness: 5
+      strokeThickness: 4
     }).setOrigin(0.5);
     
     // Subtitle
-    this.add.text(width / 2, height * 0.32, 'Mobile Multiplayer Shooter', {
-      fontSize: '18px',
+    this.add.text(width / 2, height * 0.35, 'Mobile Multiplayer Shooter', {
+      fontSize: subtitleSize,
       fill: '#00F5FF'
     }).setOrigin(0.5);
     
-    // Buttons (landscape layout - side by side with proper spacing)
-    const btnY = height * 0.5;
-    const btnSpacing = 200;
-    const btnWidth = 180;
-    const btnHeight = 55;
+    // Buttons (responsive layout)
+    const btnY = height * 0.55;
+    const btnSpacing = isMobile ? 160 : 200;
+    const btnWidth = isMobile ? 140 : 180;
+    const btnHeight = isMobile ? 45 : 55;
+    
+    const btnFontSize = isMobile ? '16px' : '22px';
     
     // Create Game Button
     this.createButton(width / 2 - btnSpacing, btnY, btnWidth, btnHeight, 
-      'CREATE GAME', 0x9D4EDD, () => {
+      'CREATE GAME', 0x9D4EDD, btnFontSize, () => {
         this.scene.start('CreateRoomScene');
       });
     
     // Join Game Button
     this.createButton(width / 2, btnY, btnWidth, btnHeight, 
-      'JOIN GAME', 0x00F5FF, () => {
+      'JOIN GAME', 0x00F5FF, btnFontSize, () => {
         this.scene.start('JoinRoomScene');
       });
     
     // Profile Button
     this.createButton(width / 2 + btnSpacing, btnY, btnWidth, btnHeight, 
-      '👤 PROFILE', 0xFFD700, () => {
+      '👤 PROFILE', 0xFFD700, btnFontSize, () => {
         this.scene.start('ProfileScene');
       });
     
-    // User info (top-right with safe area margins)
-    const safeMarginTop = 60; // Safe from notches
-    const safeMarginRight = 80; // Safe from right edge
+    // User info (top-right with safe area margins - responsive)
+    const safeMarginTop = isMobile ? 15 : 60;
+    const safeMarginRight = isMobile ? 15 : 80;
+    const userBoxWidth = isMobile ? 180 : 230;
+    const userBoxHeight = isMobile ? 40 : 50;
     
     const userInfoBg = this.add.graphics();
     userInfoBg.fillStyle(0x9D4EDD, 0.1);
-    userInfoBg.fillRoundedRect(width - 250 - safeMarginRight, safeMarginTop, 230, 50, 8);
+    userInfoBg.fillRoundedRect(width - userBoxWidth - safeMarginRight, safeMarginTop, userBoxWidth, userBoxHeight, 8);
     userInfoBg.lineStyle(1.5, 0x9D4EDD, 0.3);
-    userInfoBg.strokeRoundedRect(width - 250 - safeMarginRight, safeMarginTop, 230, 50, 8);
+    userInfoBg.strokeRoundedRect(width - userBoxWidth - safeMarginRight, safeMarginTop, userBoxWidth, userBoxHeight, 8);
     
-    this.add.text(width - 240 - safeMarginRight, safeMarginTop + 10, user.username, {
-      fontSize: '18px',
+    const userNameSize = isMobile ? '14px' : '18px';
+    const walletSize = isMobile ? '10px' : '12px';
+    const userTextX = width - userBoxWidth - safeMarginRight + 10;
+    
+    this.add.text(userTextX, safeMarginTop + (isMobile ? 8 : 10), user.username, {
+      fontSize: userNameSize,
       fill: '#9D4EDD',
       fontStyle: 'bold'
     });
@@ -81,14 +94,14 @@ export class MenuScene extends Phaser.Scene {
     const walletShort = user.wallet_address 
       ? `${user.wallet_address.slice(0, 6)}...${user.wallet_address.slice(-4)}`
       : 'Guest';
-    this.add.text(width - 240 - safeMarginRight, safeMarginTop + 28, walletShort, {
-      fontSize: '12px',
+    this.add.text(userTextX, safeMarginTop + (isMobile ? 22 : 28), walletShort, {
+      fontSize: walletSize,
       fill: '#888888'
     });
     
     // Logout button
-    const logoutBtn = this.add.text(width - 40 - safeMarginRight, safeMarginTop + 25, '🚪', {
-      fontSize: '20px'
+    const logoutBtn = this.add.text(width - safeMarginRight - (isMobile ? 20 : 30), safeMarginTop + userBoxHeight / 2, '🚪', {
+      fontSize: isMobile ? '16px' : '20px'
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     
     logoutBtn.on('pointerup', () => {
@@ -103,7 +116,7 @@ export class MenuScene extends Phaser.Scene {
     }).setOrigin(0.5);
   }
   
-  createButton(x, y, width, height, text, color, callback) {
+  createButton(x, y, width, height, text, color, fontSize, callback) {
     // Glassmorphic button container
     const glassContainer = this.add.graphics();
     glassContainer.fillStyle(color, 0.1);
@@ -119,7 +132,7 @@ export class MenuScene extends Phaser.Scene {
     const innerGlow = this.add.rectangle(x, y, width - 16, height - 16, color, 0.08);
     
     const label = this.add.text(x, y, text, {
-      fontSize: '22px',
+      fontSize: fontSize,
       fill: '#FFFFFF',
       fontStyle: 'bold'
     }).setOrigin(0.5);
