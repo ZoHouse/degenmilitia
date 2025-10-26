@@ -28,10 +28,37 @@ export class GameScene extends Phaser.Scene {
     const width = this.scale.width;
     const height = this.scale.height;
     
-    // Simple gradient background
+    // Mario-style sky blue gradient background
     const bg = this.add.graphics();
-    bg.fillGradientStyle(0x1a1a2e, 0x1a1a2e, 0x16213e, 0x16213e, 1);
+    bg.fillGradientStyle(0x5C9EE6, 0x5C9EE6, 0x87CEEB, 0x87CEEB, 1);
     bg.fillRect(0, 0, width, height);
+    
+    // Add some white clouds for Mario atmosphere
+    const clouds = [
+      { x: width * 0.2, y: height * 0.15 },
+      { x: width * 0.5, y: height * 0.1 },
+      { x: width * 0.8, y: height * 0.2 },
+    ];
+    
+    clouds.forEach(cloud => {
+      // Simple cloud shape with circles
+      const cloudGroup = this.add.graphics();
+      cloudGroup.fillStyle(0xFFFFFF, 0.8);
+      cloudGroup.fillCircle(cloud.x, cloud.y, 25);
+      cloudGroup.fillCircle(cloud.x + 20, cloud.y, 30);
+      cloudGroup.fillCircle(cloud.x + 40, cloud.y, 25);
+      cloudGroup.fillCircle(cloud.x + 20, cloud.y - 15, 20);
+      
+      // Make clouds slowly drift
+      this.tweens.add({
+        targets: cloudGroup,
+        x: cloud.x + 100,
+        duration: 30000,
+        repeat: -1,
+        yoyo: true,
+        ease: 'Linear'
+      });
+    });
     
     // Compact room code display (top-left)
     const roomCodeBg = this.add.graphics();
@@ -221,21 +248,89 @@ export class GameScene extends Phaser.Scene {
   createPlatforms(width, height) {
     this.platforms = this.physics.add.staticGroup();
     
-    // Simple ground
-    const ground = this.add.rectangle(width / 2, height - 40, width, 80, 0x2a2a3e);
+    // Ground with grass-like color (Mario green)
+    const ground = this.add.rectangle(width / 2, height - 30, width, 60, 0x7CBF3F);
     this.physics.add.existing(ground, true);
     this.platforms.add(ground);
     
-    // Just 2 simple platforms for testing - lots of open space!
+    // Add dirt texture to ground
+    const groundDirt = this.add.rectangle(width / 2, height - 10, width, 20, 0x8B4513);
+    this.physics.add.existing(groundDirt, true);
+    this.platforms.add(groundDirt);
+    
+    // Mario-style multi-level platforms
     const platformData = [
-      { x: width * 0.3, y: height * 0.6, w: 200 },
-      { x: width * 0.7, y: height * 0.6, w: 200 },
+      // Bottom level platforms (scattered)
+      { x: width * 0.15, y: height * 0.8, w: 120, h: 20, color: 0xC84B31 }, // Brick red
+      { x: width * 0.85, y: height * 0.8, w: 120, h: 20, color: 0xC84B31 },
+      
+      // Mid-low level
+      { x: width * 0.35, y: height * 0.65, w: 140, h: 20, color: 0xF4A460 }, // Sandy brown
+      { x: width * 0.65, y: height * 0.65, w: 140, h: 20, color: 0xF4A460 },
+      
+      // Middle platforms (floating)
+      { x: width * 0.2, y: height * 0.5, w: 100, h: 20, color: 0x4B7C4B }, // Dark green
+      { x: width * 0.5, y: height * 0.45, w: 160, h: 20, color: 0x4B7C4B },
+      { x: width * 0.8, y: height * 0.5, w: 100, h: 20, color: 0x4B7C4B },
+      
+      // Upper platforms
+      { x: width * 0.35, y: height * 0.3, w: 120, h: 20, color: 0xFF6B4A }, // Coral
+      { x: width * 0.65, y: height * 0.3, w: 120, h: 20, color: 0xFF6B4A },
+      
+      // Top level (highest platforms)
+      { x: width * 0.2, y: height * 0.18, w: 80, h: 20, color: 0xFFD700 }, // Gold
+      { x: width * 0.8, y: height * 0.18, w: 80, h: 20, color: 0xFFD700 },
+      
+      // Small floating platforms for extra mobility
+      { x: width * 0.1, y: height * 0.35, w: 60, h: 15, color: 0x9B59B6 }, // Purple
+      { x: width * 0.9, y: height * 0.35, w: 60, h: 15, color: 0x9B59B6 },
+      
+      // "Pipe" obstacles (vertical rectangles)
+      { x: width * 0.25, y: height - 120, w: 50, h: 90, color: 0x27AE60 }, // Green pipe left
+      { x: width * 0.75, y: height - 120, w: 50, h: 90, color: 0x27AE60 }, // Green pipe right
     ];
     
     platformData.forEach(p => {
-      const platform = this.add.rectangle(p.x, p.y, p.w, 20, 0x3d3d5c);
+      const platform = this.add.rectangle(p.x, p.y, p.w, p.h, p.color);
+      
+      // Add border to make it look more Mario-like
+      const border = this.add.graphics();
+      border.lineStyle(2, 0x000000, 0.6);
+      border.strokeRect(p.x - p.w/2, p.y - p.h/2, p.w, p.h);
+      
+      // Add highlight on top edge
+      const highlight = this.add.graphics();
+      highlight.lineStyle(2, 0xFFFFFF, 0.3);
+      highlight.lineBetween(p.x - p.w/2, p.y - p.h/2, p.x + p.w/2, p.y - p.h/2);
+      
       this.physics.add.existing(platform, true);
       this.platforms.add(platform);
+    });
+    
+    // Add decorative "?" blocks (non-collidable, just visual)
+    const questionBlocks = [
+      { x: width * 0.5, y: height * 0.6 },
+      { x: width * 0.4, y: height * 0.38 },
+      { x: width * 0.6, y: height * 0.38 },
+    ];
+    
+    questionBlocks.forEach(block => {
+      const qBlock = this.add.rectangle(block.x, block.y, 25, 25, 0xFFD700);
+      const qText = this.add.text(block.x, block.y, '?', {
+        fontSize: '20px',
+        fill: '#ffffff',
+        fontStyle: 'bold'
+      }).setOrigin(0.5);
+      
+      // Make it "float" with a subtle animation
+      this.tweens.add({
+        targets: [qBlock, qText],
+        y: block.y - 10,
+        duration: 600,
+        yoyo: true,
+        repeat: -1,
+        ease: 'Sine.easeInOut'
+      });
     });
   }
   
