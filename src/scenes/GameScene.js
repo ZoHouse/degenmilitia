@@ -11,19 +11,19 @@ export class GameScene extends Phaser.Scene {
   }
   
   preload() {
-    // Load Mini Militia sprites
-    this.load.image('background', '/src/assets/maps/background.png');
-    this.load.spritesheet('player_right', '/src/assets/sprites/character_sprite1_right.png', {
+    // Load Mini Militia sprites (Vite handles the path resolution)
+    this.load.image('background', new URL('../assets/maps/background.png', import.meta.url).href);
+    this.load.spritesheet('player_right', new URL('../assets/sprites/character_sprite1_right.png', import.meta.url).href, {
       frameWidth: 128,
       frameHeight: 128
     });
-    this.load.spritesheet('player_left', '/src/assets/sprites/character_sprite1_left.png', {
+    this.load.spritesheet('player_left', new URL('../assets/sprites/character_sprite1_left.png', import.meta.url).href, {
       frameWidth: 128,
       frameHeight: 128
     });
-    this.load.image('grass', '/src/assets/sprites/grass.png');
-    this.load.image('sand', '/src/assets/sprites/sand.png');
-    this.load.image('stones', '/src/assets/sprites/big_stones.png');
+    this.load.image('grass', new URL('../assets/sprites/grass.png', import.meta.url).href);
+    this.load.image('sand', new URL('../assets/sprites/sand.png', import.meta.url).href);
+    this.load.image('stones', new URL('../assets/sprites/big_stones.png', import.meta.url).href);
   }
   
   init(data) {
@@ -108,10 +108,13 @@ export class GameScene extends Phaser.Scene {
   }
   
   createAnimations() {
+    // Check if animations already exist to avoid duplicates
+    if (this.anims.exists('idle_right')) return;
+    
     // Idle animation (right)
     this.anims.create({
       key: 'idle_right',
-      frames: this.anims.generateFrameNumbers('player_right', { frames: [0, 1] }),
+      frames: this.anims.generateFrameNumbers('player_right', { start: 0, end: 1 }),
       frameRate: 4,
       repeat: -1
     });
@@ -119,7 +122,7 @@ export class GameScene extends Phaser.Scene {
     // Walk animation (right)
     this.anims.create({
       key: 'walk_right',
-      frames: this.anims.generateFrameNumbers('player_right', { frames: [2, 3] }),
+      frames: this.anims.generateFrameNumbers('player_right', { start: 2, end: 3 }),
       frameRate: 8,
       repeat: -1
     });
@@ -127,7 +130,7 @@ export class GameScene extends Phaser.Scene {
     // Jetpack animation (right)
     this.anims.create({
       key: 'jetpack_right',
-      frames: this.anims.generateFrameNumbers('player_right', { frames: [4, 5, 6, 7] }),
+      frames: this.anims.generateFrameNumbers('player_right', { start: 4, end: 7 }),
       frameRate: 10,
       repeat: -1
     });
@@ -135,7 +138,7 @@ export class GameScene extends Phaser.Scene {
     // Idle animation (left)
     this.anims.create({
       key: 'idle_left',
-      frames: this.anims.generateFrameNumbers('player_left', { frames: [0, 1] }),
+      frames: this.anims.generateFrameNumbers('player_left', { start: 0, end: 1 }),
       frameRate: 4,
       repeat: -1
     });
@@ -143,7 +146,7 @@ export class GameScene extends Phaser.Scene {
     // Walk animation (left)
     this.anims.create({
       key: 'walk_left',
-      frames: this.anims.generateFrameNumbers('player_left', { frames: [2, 3] }),
+      frames: this.anims.generateFrameNumbers('player_left', { start: 2, end: 3 }),
       frameRate: 8,
       repeat: -1
     });
@@ -151,7 +154,7 @@ export class GameScene extends Phaser.Scene {
     // Jetpack animation (left)
     this.anims.create({
       key: 'jetpack_left',
-      frames: this.anims.generateFrameNumbers('player_left', { frames: [4, 5, 6, 7] }),
+      frames: this.anims.generateFrameNumbers('player_left', { start: 4, end: 7 }),
       frameRate: 10,
       repeat: -1
     });
@@ -210,8 +213,14 @@ export class GameScene extends Phaser.Scene {
     this.player.setBounce(0.1);
     this.player.body.setSize(60, 80); // Adjust collision box
     
-    // Play idle animation
-    this.player.play('idle_right');
+    // Play idle animation (safely)
+    try {
+      if (this.anims.exists('idle_right')) {
+        this.player.play('idle_right');
+      }
+    } catch (error) {
+      console.warn('Animation not loaded yet:', error);
+    }
     
     // Add collision with platforms
     this.physics.add.collider(this.player, this.platforms);
@@ -296,7 +305,7 @@ export class GameScene extends Phaser.Scene {
       
       // Jetpack animation
       const jetpackAnim = this.playerDirection === 'right' ? 'jetpack_right' : 'jetpack_left';
-      if (this.player.anims.currentAnim?.key !== jetpackAnim) {
+      if (this.anims.exists(jetpackAnim) && this.player.anims.currentAnim?.key !== jetpackAnim) {
         this.player.play(jetpackAnim);
       }
       
@@ -321,12 +330,12 @@ export class GameScene extends Phaser.Scene {
       // Walking or idle animation
       if (moveX !== 0) {
         const walkAnim = this.playerDirection === 'right' ? 'walk_right' : 'walk_left';
-        if (this.player.anims.currentAnim?.key !== walkAnim) {
+        if (this.anims.exists(walkAnim) && this.player.anims.currentAnim?.key !== walkAnim) {
           this.player.play(walkAnim);
         }
       } else {
         const idleAnim = this.playerDirection === 'right' ? 'idle_right' : 'idle_left';
-        if (this.player.anims.currentAnim?.key !== idleAnim) {
+        if (this.anims.exists(idleAnim) && this.player.anims.currentAnim?.key !== idleAnim) {
           this.player.play(idleAnim);
         }
       }
