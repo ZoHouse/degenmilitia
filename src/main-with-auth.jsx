@@ -96,6 +96,11 @@ function App() {
         render: {
           pixelArt: false,
           antialias: true
+        },
+        input: {
+          activePointers: 3, // Support multiple simultaneous touches (1 mouse + 2 touches)
+          touch: true,
+          mouse: true
         }
       };
 
