@@ -68,3 +68,10 @@ output.apk
 # Custom user assets (keep structure but ignore content)
 # Users will add their own custom assets
 
+# Node.js
+node_modules/
+package-lock.json
+
+# Build output (Vercel will build this)
+dist/
+
