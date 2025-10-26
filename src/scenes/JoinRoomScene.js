@@ -87,12 +87,13 @@ export class JoinRoomScene extends Phaser.Scene {
   
   createKeyboard(width, height) {
     const keys = [
+      ['2', '3', '4', '5', '6', '7', '8', '9'],
       ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'P'],
       ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K'],
       ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫']
     ];
     
-    const startY = height * 0.62;
+    const startY = height * 0.58;
     const keySize = 45;
     const gap = 8;
     

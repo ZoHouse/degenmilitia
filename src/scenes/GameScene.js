@@ -142,7 +142,17 @@ export class GameScene extends Phaser.Scene {
       padding: { x: 4, y: 2 }
     }).setOrigin(0.5);
     
-    this.otherPlayerSprites.set(playerId, { sprite, nameLabel });
+    // Create health bar
+    const healthBarBg = this.add.rectangle(0, -50, 32, 4, 0x000000, 0.5);
+    const healthBar = this.add.rectangle(0, -50, 30, 3, 0x00ff00);
+    
+    this.otherPlayerSprites.set(playerId, { 
+      sprite, 
+      nameLabel, 
+      healthBarBg,
+      healthBar,
+      health: 100 
+    });
   }
   
   removeOtherPlayer(playerId) {
@@ -150,6 +160,8 @@ export class GameScene extends Phaser.Scene {
     if (player) {
       player.sprite.destroy();
       player.nameLabel.destroy();
+      if (player.healthBarBg) player.healthBarBg.destroy();
+      if (player.healthBar) player.healthBar.destroy();
       this.otherPlayerSprites.delete(playerId);
     }
   }
@@ -169,6 +181,14 @@ export class GameScene extends Phaser.Scene {
       player.sprite.y = Phaser.Math.Linear(player.sprite.y, data.y, 0.3);
       player.nameLabel.x = player.sprite.x;
       player.nameLabel.y = player.sprite.y - 35;
+      
+      // Update health bar position
+      if (player.healthBarBg && player.healthBar) {
+        player.healthBarBg.x = player.sprite.x;
+        player.healthBarBg.y = player.sprite.y - 50;
+        player.healthBar.x = player.sprite.x;
+        player.healthBar.y = player.sprite.y - 50;
+      }
       
       // Show jetpack particles if jetpacking
       if (data.isJetpacking && Math.random() > 0.7) {
@@ -228,6 +248,10 @@ export class GameScene extends Phaser.Scene {
     
     // Add collision with platforms
     this.physics.add.collider(this.player, this.platforms);
+    
+    // Create health bar for main player
+    this.playerHealthBarBg = this.add.rectangle(0, -50, 32, 4, 0x000000, 0.5);
+    this.playerHealthBar = this.add.rectangle(0, -50, 30, 3, 0x00ff00);
   }
   
   createHUD(width, height, safeMarginTop) {
@@ -342,6 +366,70 @@ export class GameScene extends Phaser.Scene {
     if (shooting) {
       this.shootBullet(shootAngle);
     }
+    
+    // Update main player health bar position
+    if (this.playerHealthBarBg && this.playerHealthBar) {
+      this.playerHealthBarBg.x = this.player.x;
+      this.playerHealthBarBg.y = this.player.y - 50;
+      this.playerHealthBar.x = this.player.x;
+      this.playerHealthBar.y = this.player.y - 50;
+      
+      // Update health bar width based on health
+      const healthPercent = this.health / 100;
+      this.playerHealthBar.width = 30 * healthPercent;
+      
+      // Change color based on health
+      if (this.health > 60) {
+        this.playerHealthBar.setFillStyle(0x00ff00);
+      } else if (this.health > 30) {
+        this.playerHealthBar.setFillStyle(0xffff00);
+      } else {
+        this.playerHealthBar.setFillStyle(0xff0000);
+      }
+    }
+    
+    // Check bullet collisions with other players
+    this.bullets.children.entries.forEach(bullet => {
+      if (!bullet.active) return;
+      
+      // Check collision with other players
+      this.otherPlayerSprites.forEach((player, playerId) => {
+        if (Phaser.Math.Distance.Between(bullet.x, bullet.y, player.sprite.x, player.sprite.y) < 30) {
+          // Hit!
+          player.health = Math.max(0, player.health - 10);
+          
+          // Update health bar
+          const healthPercent = player.health / 100;
+          player.healthBar.width = 30 * healthPercent;
+          
+          // Change color based on health
+          if (player.health > 60) {
+            player.healthBar.setFillStyle(0x00ff00);
+          } else if (player.health > 30) {
+            player.healthBar.setFillStyle(0xffff00);
+          } else {
+            player.healthBar.setFillStyle(0xff0000);
+          }
+          
+          // Flash effect
+          player.sprite.setAlpha(0.5);
+          this.time.delayedCall(100, () => {
+            if (player.sprite) player.sprite.setAlpha(1);
+          });
+          
+          // Check if killed
+          if (player.health <= 0) {
+            this.recordKill();
+            // Respawn other player (in real game, this would be synced)
+            player.health = 100;
+            player.healthBar.width = 30;
+            player.healthBar.setFillStyle(0x00ff00);
+          }
+          
+          bullet.destroy();
+        }
+      });
+    });
     
     // Clean bullets
     this.bullets.children.entries.forEach(bullet => {
