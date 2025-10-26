@@ -258,36 +258,26 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.existing(groundDirt, true);
     this.platforms.add(groundDirt);
     
-    // Mario-style multi-level platforms
+    // Simplified Mario-style platforms - cleaner layout
     const platformData = [
-      // Bottom level platforms (scattered)
-      { x: width * 0.15, y: height * 0.8, w: 120, h: 20, color: 0xC84B31 }, // Brick red
-      { x: width * 0.85, y: height * 0.8, w: 120, h: 20, color: 0xC84B31 },
+      // Bottom level platforms (left and right)
+      { x: width * 0.2, y: height * 0.75, w: 150, h: 20, color: 0xC84B31 }, // Brick red
+      { x: width * 0.8, y: height * 0.75, w: 150, h: 20, color: 0xC84B31 },
       
-      // Mid-low level
-      { x: width * 0.35, y: height * 0.65, w: 140, h: 20, color: 0xF4A460 }, // Sandy brown
-      { x: width * 0.65, y: height * 0.65, w: 140, h: 20, color: 0xF4A460 },
-      
-      // Middle platforms (floating)
-      { x: width * 0.2, y: height * 0.5, w: 100, h: 20, color: 0x4B7C4B }, // Dark green
-      { x: width * 0.5, y: height * 0.45, w: 160, h: 20, color: 0x4B7C4B },
-      { x: width * 0.8, y: height * 0.5, w: 100, h: 20, color: 0x4B7C4B },
+      // Middle level platforms
+      { x: width * 0.35, y: height * 0.55, w: 140, h: 20, color: 0xF4A460 }, // Sandy brown
+      { x: width * 0.65, y: height * 0.55, w: 140, h: 20, color: 0xF4A460 },
       
       // Upper platforms
-      { x: width * 0.35, y: height * 0.3, w: 120, h: 20, color: 0xFF6B4A }, // Coral
-      { x: width * 0.65, y: height * 0.3, w: 120, h: 20, color: 0xFF6B4A },
+      { x: width * 0.2, y: height * 0.35, w: 120, h: 20, color: 0x4B7C4B }, // Dark green
+      { x: width * 0.8, y: height * 0.35, w: 120, h: 20, color: 0x4B7C4B },
       
-      // Top level (highest platforms)
-      { x: width * 0.2, y: height * 0.18, w: 80, h: 20, color: 0xFFD700 }, // Gold
-      { x: width * 0.8, y: height * 0.18, w: 80, h: 20, color: 0xFFD700 },
-      
-      // Small floating platforms for extra mobility
-      { x: width * 0.1, y: height * 0.35, w: 60, h: 15, color: 0x9B59B6 }, // Purple
-      { x: width * 0.9, y: height * 0.35, w: 60, h: 15, color: 0x9B59B6 },
+      // Top central platform
+      { x: width * 0.5, y: height * 0.2, w: 180, h: 20, color: 0xFFD700 }, // Gold
       
       // "Pipe" obstacles (vertical rectangles)
-      { x: width * 0.25, y: height - 120, w: 50, h: 90, color: 0x27AE60 }, // Green pipe left
-      { x: width * 0.75, y: height - 120, w: 50, h: 90, color: 0x27AE60 }, // Green pipe right
+      { x: width * 0.15, y: height - 100, w: 50, h: 80, color: 0x27AE60 }, // Green pipe left
+      { x: width * 0.85, y: height - 100, w: 50, h: 80, color: 0x27AE60 }, // Green pipe right
     ];
     
     platformData.forEach(p => {
@@ -305,32 +295,6 @@ export class GameScene extends Phaser.Scene {
       
       this.physics.add.existing(platform, true);
       this.platforms.add(platform);
-    });
-    
-    // Add decorative "?" blocks (non-collidable, just visual)
-    const questionBlocks = [
-      { x: width * 0.5, y: height * 0.6 },
-      { x: width * 0.4, y: height * 0.38 },
-      { x: width * 0.6, y: height * 0.38 },
-    ];
-    
-    questionBlocks.forEach(block => {
-      const qBlock = this.add.rectangle(block.x, block.y, 25, 25, 0xFFD700);
-      const qText = this.add.text(block.x, block.y, '?', {
-        fontSize: '20px',
-        fill: '#ffffff',
-        fontStyle: 'bold'
-      }).setOrigin(0.5);
-      
-      // Make it "float" with a subtle animation
-      this.tweens.add({
-        targets: [qBlock, qText],
-        y: block.y - 10,
-        duration: 600,
-        yoyo: true,
-        repeat: -1,
-        ease: 'Sine.easeInOut'
-      });
     });
   }
   
