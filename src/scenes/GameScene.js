@@ -1,6 +1,7 @@
 import { DualJoystickControls } from '../controls/DualJoystickControls.js';
 import { authService } from '../services/AuthService.js';
 import { userMetricsService } from '../services/UserMetricsService.js';
+import { MultiplayerService } from '../services/MultiplayerService.js';
 
 /**
  * Main Game Scene
@@ -19,6 +20,8 @@ export class GameScene extends Phaser.Scene {
     this.isHost = data.isHost;
     this.currentUser = authService.getCurrentUser();
     this.gameStartTime = Date.now();
+    this.multiplayer = null;
+    this.otherPlayerSprites = new Map();
   }
   
   create() {
@@ -89,6 +92,110 @@ export class GameScene extends Phaser.Scene {
     
     // HUD
     this.createHUD(width, height, safeMarginTop);
+    
+    // Initialize Multiplayer
+    this.initMultiplayer();
+  }
+  
+  initMultiplayer() {
+    const playerId = this.currentUser?.id || `guest_${Date.now()}`;
+    const playerName = this.currentUser?.username || 'Guest';
+    
+    this.multiplayer = new MultiplayerService(this.roomCode, playerId, playerName);
+    
+    // Set up callbacks
+    this.multiplayer.on('onPlayerJoined', (player) => {
+      console.log('🎮 Player joined:', player.playerName);
+      this.createOtherPlayer(player.playerId, player.playerName);
+    });
+    
+    this.multiplayer.on('onPlayerLeft', (playerId) => {
+      console.log('👋 Player left:', playerId);
+      this.removeOtherPlayer(playerId);
+    });
+    
+    this.multiplayer.on('onPlayerUpdate', (data) => {
+      this.updateOtherPlayer(data);
+    });
+    
+    this.multiplayer.on('onBulletFired', (data) => {
+      this.createOtherPlayerBullet(data);
+    });
+    
+    // Connect to multiplayer room
+    this.multiplayer.connect();
+  }
+  
+  createOtherPlayer(playerId, playerName) {
+    if (this.otherPlayerSprites.has(playerId)) return;
+    
+    // Create player sprite (different color from main player)
+    const sprite = this.add.rectangle(100, 100, 30, 50, 0xff6b6b);
+    this.physics.add.existing(sprite);
+    sprite.body.setCollideWorldBounds(true);
+    
+    // Add name label
+    const nameLabel = this.add.text(0, -35, playerName, {
+      fontSize: '10px',
+      fill: '#ffffff',
+      backgroundColor: '#000000',
+      padding: { x: 4, y: 2 }
+    }).setOrigin(0.5);
+    
+    this.otherPlayerSprites.set(playerId, { sprite, nameLabel });
+  }
+  
+  removeOtherPlayer(playerId) {
+    const player = this.otherPlayerSprites.get(playerId);
+    if (player) {
+      player.sprite.destroy();
+      player.nameLabel.destroy();
+      this.otherPlayerSprites.delete(playerId);
+    }
+  }
+  
+  updateOtherPlayer(data) {
+    let player = this.otherPlayerSprites.get(data.playerId);
+    
+    // Create if doesn't exist
+    if (!player) {
+      this.createOtherPlayer(data.playerId, data.playerName);
+      player = this.otherPlayerSprites.get(data.playerId);
+    }
+    
+    if (player) {
+      // Smoothly interpolate position
+      player.sprite.x = Phaser.Math.Linear(player.sprite.x, data.x, 0.3);
+      player.sprite.y = Phaser.Math.Linear(player.sprite.y, data.y, 0.3);
+      player.nameLabel.x = player.sprite.x;
+      player.nameLabel.y = player.sprite.y - 35;
+      
+      // Show jetpack particles if jetpacking
+      if (data.isJetpacking && Math.random() > 0.7) {
+        const particle = this.add.circle(
+          player.sprite.x + Phaser.Math.Between(-10, 10),
+          player.sprite.y + 25,
+          Phaser.Math.Between(3, 6), 0xff6600
+        );
+        this.tweens.add({
+          targets: particle,
+          y: particle.y + 30,
+          alpha: 0,
+          duration: 400,
+          onComplete: () => particle.destroy()
+        });
+      }
+    }
+  }
+  
+  createOtherPlayerBullet(data) {
+    const bullet = this.add.circle(data.x, data.y, 5, 0xffff00);
+    this.physics.add.existing(bullet);
+    bullet.body.setVelocity(data.velocityX, data.velocityY);
+    
+    this.time.delayedCall(2500, () => {
+      if (bullet && bullet.active) bullet.destroy();
+    });
   }
   
   createPlatforms(width, height) {
@@ -165,6 +272,23 @@ export class GameScene extends Phaser.Scene {
   
   update() {
     if (!this.player) return;
+    
+    // Broadcast position to other players (throttled to every 50ms)
+    if (!this.lastBroadcast || Date.now() - this.lastBroadcast > 50) {
+      this.lastBroadcast = Date.now();
+      if (this.multiplayer) {
+        const isJetpacking = this.jetpackFuel > 0 && this.player.body.velocity.y < -100;
+        this.multiplayer.broadcastPlayerUpdate(
+          this.player.x,
+          this.player.y,
+          this.player.body.velocity.x,
+          this.player.body.velocity.y,
+          isJetpacking,
+          false,
+          0
+        );
+      }
+    }
     
     // Get input from mobile controls (priority) OR keyboard
     let moveX = 0;
@@ -271,14 +395,32 @@ export class GameScene extends Phaser.Scene {
     this.bullets.add(bullet);
     
     const speed = 900;
-    bullet.body.setVelocity(
-      Math.cos(angle) * speed,
-      Math.sin(angle) * speed
-    );
+    const velocityX = Math.cos(angle) * speed;
+    const velocityY = Math.sin(angle) * speed;
+    
+    bullet.body.setVelocity(velocityX, velocityY);
+    
+    // Broadcast bullet to other players
+    if (this.multiplayer) {
+      this.multiplayer.broadcastBulletFired(
+        this.player.x,
+        this.player.y,
+        angle,
+        velocityX,
+        velocityY
+      );
+    }
     
     this.time.delayedCall(2500, () => {
       if (bullet && bullet.active) bullet.destroy();
     });
+  }
+  
+  shutdown() {
+    // Clean up multiplayer connection
+    if (this.multiplayer) {
+      this.multiplayer.disconnect();
+    }
   }
 }
 
