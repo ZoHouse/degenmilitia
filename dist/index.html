@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-fullscreen">
+    <meta name="apple-mobile-web-app-title" content="Degen Militia">
+    <meta name="theme-color" content="#9D4EDD">
+    
+    <!-- Force landscape orientation -->
+    <meta name="screen-orientation" content="landscape">
+    <meta name="x5-orientation" content="landscape">
+    <meta name="x5-fullscreen" content="true">
+    
+    <title>Degen Militia - Mobile Shooter</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+    <link rel="alternate icon" href="/favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    
+    <style>
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: fixed;
+            background: #10002B;
+        }
+        
+        body { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            color: white;
+            touch-action: none;
+        }
+        
+        #game-container { 
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+        
+        #loading {
+            text-align: center;
+            font-size: 24px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1000;
+        }
+        
+        #loading h1 {
+            font-size: clamp(32px, 8vw, 64px);
+            color: #9D4EDD;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px #7B2CBF;
+        }
+        
+        #loading p {
+            color: #00F5FF;
+            animation: pulse 1.5s infinite;
+            font-size: clamp(16px, 4vw, 24px);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Landscape orientation prompt */
+        #orientation-prompt {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #10002B;
+            z-index: 9999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        #orientation-prompt.show {
+            display: flex;
+        }
+        
+        #orientation-prompt .icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+            animation: rotate 2s infinite;
+        }
+        
+        @keyframes rotate {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg); }
+            75% { transform: rotate(10deg); }
+        }
+        
+        #orientation-prompt h2 {
+            font-size: 24px;
+            color: #9D4EDD;
+            margin-bottom: 10px;
+        }
+        
+        #orientation-prompt p {
+            color: #00F5FF;
+            font-size: 16px;
+        }
+        
+        @media (orientation: portrait) {
+            #orientation-prompt {
+                display: flex !important;
+            }
+        }
+    </style>
+  <script type="module" crossorigin src="/assets/index-C_KZZ2xK.js"></script>
+</head>
+<body>
+    <!-- Landscape orientation prompt -->
+    <div id="orientation-prompt">
+        <div class="icon">📱↻</div>
+        <h2>Please Rotate Your Device</h2>
+        <p>Degen Militia is best played in landscape mode</p>
+    </div>
+    
+    <div id="auth-container"></div>
+    <div id="game-container"></div>
+    
+    <div id="loading" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #10002B 0%, #240046 50%, #3C096C 100%); display: flex; justify-content: center; align-items: center; z-index: 9999;">
+        <div style="text-align: center; color: white;">
+            <h1>🎮 DEGEN MILITIA</h1>
+            <p>Loading...</p>
+        </div>
+    </div>
+    
+    <!-- 
+    ⚠️ IMPORTANT: If you see "Pocket Universe is running!" error:
+    Disable the Pocket Universe browser extension for this site.
+    It interferes with Privy authentication.
+    -->
+    
+    <script>
+        // Force landscape orientation on mobile (with graceful fallback)
+        function lockOrientation() {
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape-primary').catch(() => {
+                    // Silently fail - orientation lock requires fullscreen on some devices
+                });
+            } else if (screen.lockOrientation) {
+                // Older API
+                screen.lockOrientation('landscape-primary');
+            } else if (screen.mozLockOrientation) {
+                screen.mozLockOrientation('landscape-primary');
+            } else if (screen.msLockOrientation) {
+                screen.msLockOrientation('landscape-primary');
+            }
+        }
+        
+        // Try to lock on load
+        lockOrientation();
+        
+        // Try again on user interaction (needed for fullscreen)
+        document.addEventListener('click', lockOrientation, { once: true });
+        document.addEventListener('touchstart', lockOrientation, { once: true });
+        
+        // Prevent scrolling and zooming on mobile
+        document.addEventListener('touchmove', e => {
+            if (e.target.tagName !== 'INPUT') {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        document.addEventListener('gesturestart', e => e.preventDefault());
+        document.addEventListener('gesturechange', e => e.preventDefault());
+        document.addEventListener('gestureend', e => e.preventDefault());
+    </script>
+</body>
+</html>

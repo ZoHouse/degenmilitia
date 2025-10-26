@@ -1,348 +1,251 @@
-# 🎮 Degen Militia - Mini Militia Mod Project
+# 🎮 DEGEN MILITIA
 
-A comprehensive modding toolkit for transforming Mini Militia into a custom "Degen Militia" game with unlimited features and complete rebranding capabilities.
+A multiplayer 2D shooter PWA (Progressive Web App) inspired by Mini Militia, built with Phaser 3, React, and Web3 authentication.
 
-![Degen Militia Logo](assets/logo.png)
+## 🚀 Features
 
----
+- **Mobile-First Design**: Optimized for mobile gameplay with dual joystick controls
+- **Web3 Authentication**: Login with Privy (Twitter/X, Email, or Wallet)
+- **Real-time Multiplayer**: Room-based multiplayer with Supabase backend
+- **Player Stats & Progression**: Track kills, deaths, K/D ratio, win rate, and level up
+- **PWA Support**: Install on mobile devices for native app experience
+- **Landscape Mode**: Designed for landscape gameplay on mobile
 
-## 📖 What is This?
+## 🛠️ Tech Stack
 
-This repository contains everything you need to:
-- ✅ **Reverse engineer** and mod Mini Militia APK (v4.0.42)
-- ✅ **Unlock all features**: Unlimited ammo, health, flight, pro pack, etc.
-- ✅ **Rebrand completely**: Custom name, icons, graphics, music
-- ✅ **Automate the process**: Scripts for patching, building, and signing
+- **Frontend**: React 18 + Vite
+- **Game Engine**: Phaser 3.90
+- **Authentication**: Privy.io (Web3 auth)
+- **Database**: Supabase (PostgreSQL)
+- **Deployment**: Vercel
+- **Styling**: Pure CSS with glassmorphism design
 
-Perfect for learning APK modding, ARM binary patching, and Android reverse engineering.
+## 📦 Installation
 
----
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+- Supabase account
+- Privy.io account
 
-## 🚀 Quick Start
+### Setup
 
-### For macOS/Linux Users
+1. **Clone the repository**
 ```bash
-cd scripts
-./setup-environment.sh
-# Follow the wizard
+cd degen-militia-pwa
+npm install
 ```
 
-### For Windows Users
-```cmd
-cd scripts
-setup-environment.bat
-REM Follow the wizard
-```
+2. **Configure environment variables**
 
-### What You Need
-1. **Java JDK 11+** (Required)
-2. **Mini Militia APK v4.0.42** ([Download here](https://www.androidapksbox.com/apk/doodle-army-2-mini-militia-4-0-42-242-old-apk/))
-3. **Android device** or emulator for testing
+Create a `.env` file in the `degen-militia-pwa` directory:
 
----
-
-## 📚 Documentation
-
-### Platform-Specific Guides
-- **📘 [Windows Setup Guide](WINDOWS-SETUP.md)** - Complete guide for Windows users
-- **📗 [macOS/Linux Guide](DEGEN-MILITIA-GUIDE.md)** - Complete guide for Unix systems
-- **📙 [Quick Start](QUICKSTART.md)** - Fast-track setup for experienced users
-
-### Technical Documentation
-- **📕 [Original Technical README](docs/TECHNICAL-README.md)** - Reverse engineering details
-- **🛠️ [Scripts Documentation](scripts/README.md)** - Automation scripts reference
-
----
-
-## ✨ Features
-
-### Game Modifications
-- 💎 **Pro Pack Unlocked** - All premium features free
-- ❤️ **Unlimited Health** - Never die (set to 100%)
-- 🚀 **Unlimited Jetpack** - Fly forever
-- 🔫 **No Reload Time** - Instant reload for all weapons
-- 💥 **4x Bullets Per Shot** - Quad damage output
-- 🔫🔫 **Dual Wield Everything** - Any weapon can be dual-wielded
-- 🛒 **All Items Unlocked** - Every shop item purchased
-- ⚡ **Unlimited Ammo** - Never run out
-
-### Customization
-- 🎨 Custom app name and package
-- 🖼️ Replace all graphics and icons
-- 🎵 Custom menu music
-- 🗺️ Modify map configurations
-- 🎨 Change color schemes
-- 📝 Rebrand all text strings
-
----
-
-## 🛠️ What's Included
-
-### Automation Scripts
-
-Located in `scripts/` directory:
-
-#### Cross-Platform Scripts
-- **`apply-degen-patches.sh`** (Unix) / **`apply-degen-patches.bat`** (Windows)
-  - Automated binary patcher
-  - Applies all game modifications
-  - Creates automatic backups
-
-- **`setup-environment.sh`** (Unix) / **`setup-environment.bat`** (Windows)
-  - Complete environment setup
-  - Downloads APKTool
-  - Creates project structure
-  - Verifies prerequisites
-
-- **`full-rebuild.sh`** (Unix only)
-  - Complete build pipeline
-  - Patch → Build → Sign → Optimize
-  - One command deployment
-
-#### Additional Tools
-- **`replaceByte.sh`** - Generic hex patching utility
-- **`signit.sh`** - APK signing wrapper
-- **`createoffsets.rr2`** - Radare2 offset finder script
-
----
-
-## 📁 Project Structure
-
-```
-degen-militia/
-├── README.md                    # This file
-├── WINDOWS-SETUP.md            # Windows-specific guide
-├── DEGEN-MILITIA-GUIDE.md      # Complete modding guide (Unix)
-├── QUICKSTART.md               # Quick reference
-├── .gitignore                  # Git ignore rules
-│
-├── assets/
-│   └── logo.png                # Project logo
-│
-├── scripts/
-│   ├── README.md               # Scripts documentation
-│   ├── setup-environment.sh    # Unix setup wizard
-│   ├── setup-environment.bat   # Windows setup wizard
-│   ├── apply-degen-patches.sh  # Unix patcher
-│   ├── apply-degen-patches.bat # Windows patcher
-│   ├── full-rebuild.sh         # Complete build script (Unix)
-│   ├── replaceByte.sh          # Hex editor script
-│   ├── signit.sh               # Signing script
-│   └── createoffsets.rr2       # Radare2 script
-│
-└── docs/
-    └── TECHNICAL-README.md     # Original technical guide
-```
-
-### Generated Directories (Not in Repo)
-These are created during setup and ignored by git:
-
-```
-~/DegenMilitia/                 # Created by setup script
-├── original-apk/               # Place original APK here
-├── unpacked/                   # Unpacked APK contents
-├── signed-apk/                 # Final signed APKs
-├── backups/                    # Automatic backups
-└── assets-custom/              # Your custom assets
-    ├── icons/
-    ├── graphics/
-    ├── audio/
-    └── fonts/
-```
-
----
-
-## 🎯 Typical Workflow
-
-### 1. Initial Setup
 ```bash
-# Run setup wizard
-cd scripts
-./setup-environment.sh  # macOS/Linux
-# OR
-setup-environment.bat   # Windows
+cp .env.example .env
 ```
 
-### 2. Get the APK
-- Download Mini Militia v4.0.42
-- Place in `~/DegenMilitia/original-apk/mini-militia.apk`
+Then edit `.env` with your actual credentials:
 
-### 3. Unpack
+```env
+# Supabase Configuration
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
+
+# Privy Configuration
+VITE_PRIVY_APP_ID=your_privy_app_id_here
+
+# Environment
+VITE_ENV=development
+```
+
+3. **Set up Supabase database**
+
+Run the database schema:
 ```bash
-cd ~/DegenMilitia
-java -jar ~/degen-militia-tools/apktool.jar d original-apk/mini-militia.apk -o unpacked
+npm run setup:db
 ```
 
-### 4. Modify
-- Edit text: `unpacked/res/values/strings.xml`
-- Replace icons: `unpacked/res/mipmap-*/`
-- Replace music: `unpacked/assets/presMix.mp3`
-- Change package: `unpacked/AndroidManifest.xml`
+Or manually execute the SQL files in Supabase:
+- `database-schema-with-auth.sql` - Main schema
+- `fix-rls-policies.sql` - Row Level Security policies
 
-### 5. Apply Patches
+4. **Start development server**
 ```bash
-cd path/to/repo/scripts
-./apply-degen-patches.sh ~/DegenMilitia/unpacked/lib/armeabi-v7a/libcocos2dcpp.so
+npm run dev
 ```
 
-### 6. Build & Sign
+Visit `http://localhost:3000` (or your network IP for mobile testing)
+
+## 🌐 Deployment to Vercel
+
+### One-Click Deploy
+
+The easiest way to deploy:
+
+1. **Push to GitHub** (this repo)
+
+2. **Connect to Vercel**:
+   - Go to [vercel.com](https://vercel.com)
+   - Click "New Project"
+   - Import your GitHub repository
+   - Select the `degen-militia-pwa` directory as root
+
+3. **Configure Environment Variables** in Vercel:
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_PRIVY_APP_ID`
+   - `VITE_ENV=production`
+
+4. **Deploy** - Vercel will automatically build and deploy
+
+### Manual Deploy
+
 ```bash
-# Option 1: Use full rebuild script (Unix only)
-./full-rebuild.sh
+# Install Vercel CLI
+npm i -g vercel
 
-# Option 2: Manual
-cd ~/DegenMilitia
-java -jar ~/degen-militia-tools/apktool.jar b unpacked -o degen-militia.apk
-keytool -genkey -v -keystore mykey.keystore -alias mykey -keyalg RSA -keysize 2048 -validity 10000
-jarsigner -keystore mykey.keystore degen-militia.apk mykey
+# Deploy
+cd degen-militia-pwa
+vercel
+
+# Or deploy to production
+vercel --prod
 ```
 
-### 7. Install
+## 🎮 How to Play
+
+1. **Login**: Authenticate with Twitter/X, Email, or Web3 wallet via Privy
+2. **Create or Join Room**: 
+   - Create a room and share the 6-character code
+   - Or join an existing room with a code
+3. **Controls** (Mobile):
+   - Left joystick: Move player and activate jetpack (push up)
+   - Right joystick: Aim and shoot
+4. **Controls** (Desktop):
+   - WASD/Arrow keys: Move
+   - W: Jetpack
+   - Mouse: Aim and click to shoot
+
+## 📱 Mobile Installation
+
+To install as a PWA on mobile:
+
+**iOS (Safari)**:
+1. Visit the game URL
+2. Tap the Share button
+3. Select "Add to Home Screen"
+
+**Android (Chrome)**:
+1. Visit the game URL
+2. Tap the three dots menu
+3. Select "Install app" or "Add to Home Screen"
+
+## 🏗️ Project Structure
+
+```
+degen-militia-pwa/
+├── src/
+│   ├── main-with-auth.jsx          # Entry point with Privy auth
+│   ├── auth/
+│   │   └── PrivyAuth.jsx            # Privy authentication component
+│   ├── scenes/                      # Phaser game scenes
+│   │   ├── MenuScene.js
+│   │   ├── ProfileScene.js
+│   │   ├── CreateRoomScene.js
+│   │   ├── JoinRoomScene.js
+│   │   └── GameScene.js
+│   ├── controls/
+│   │   └── DualJoystickControls.js  # Mobile touch controls
+│   ├── services/
+│   │   ├── AuthService.js           # User authentication
+│   │   └── UserMetricsService.js    # Stats tracking
+│   ├── config/
+│   │   ├── env.js                   # Environment config
+│   │   ├── privy.js                 # Privy config
+│   │   └── supabase.js              # Supabase client
+│   └── assets/                      # Game assets (sprites, audio, maps)
+├── public/
+│   └── manifest.json                # PWA manifest
+├── index.html                       # HTML entry point
+├── vite.config.js                   # Vite configuration
+└── vercel.json                      # Vercel deployment config
+```
+
+## 🔧 Development Scripts
+
 ```bash
-adb install degen-militia.apk
+npm run dev         # Start development server
+npm run build       # Build for production
+npm run preview     # Preview production build
+npm run test:env    # Test environment variables
+npm run setup:db    # Setup Supabase database
 ```
 
----
+## 🎨 Game Mechanics
 
-## 🔧 Technical Details
+- **Movement**: WASD/Arrow keys or left joystick
+- **Jetpack**: W key or push left joystick up
+- **Shooting**: Mouse click or right joystick
+- **Health System**: 100 HP with regeneration
+- **Jetpack Fuel**: Auto-regenerating fuel system
+- **Platforms**: 2D platformer with gravity and collisions
 
-### Binary Patching
-All game modifications are done by patching ARM assembly instructions in `libcocos2dcpp.so`:
+## 📊 Database Schema
 
-| Feature | Method | Address | Hex Patch |
-|---------|--------|---------|-----------|
-| Pro Pack | Always return true | 0x0054e96a | `01 20` |
-| Health | Set to 100% | 0x004d8ff6 | `64 20` |
-| Flight | Always return true | 0x004d7f2a | `01 1c` |
-| No Reload | Return 0 | 0x00518358 | `00 20` |
-| 4x Bullets | Return 4 | 0x00518666 | `04 20` |
-| Dual Wield 1 | Always return true | 0x00518696 | `01 20` |
-| Dual Wield 2 | Always return true | 0x005186b6 | `01 20` |
-| All Items | Return true | 0x003d053e | `01 1c` |
+The game uses Supabase with the following main tables:
 
-### How It Works
-1. **APKTool** decompiles APK to readable format
-2. **Modify resources** (XML, images, audio)
-3. **Patch binary** using `dd` (Unix) or PowerShell (Windows)
-4. **APKTool** recompiles to APK
-5. **jarsigner** signs with your key
-6. **Install** on Android device
+- `profiles`: User profiles and wallet addresses
+- `player_stats`: Game statistics (kills, deaths, K/D, etc.)
+- `game_rooms`: Multiplayer room management
+- `game_sessions`: Active game sessions
 
----
+See `database-schema-with-auth.sql` for complete schema.
 
-## 🎨 Customization Ideas
+## 🔒 Security
 
-### Weapon Rebranding
-- Sniper → "Degen Deleter"
-- Shotgun → "Degen Spreader"
-- SMG → "Degen Sprayer"
-- Rocket Launcher → "Degen Yeeter"
-
-### UI Text
-- "Play" → "LFG"
-- "Training" → "Git Gud"
-- "Pro Pack" → "Degen Pack"
-- "Quick Match" → "Quick Degen"
-
-### Color Schemes
-- **Purple Degen**: `#9D4EDD`, `#7B2CBF`, `#00F5FF`
-- **Neon Degen**: `#00FF00`, `#FF00FF`, `#00FFFF`
-- **Dark Mode**: `#10002B`, `#E0AAFF`, `#FFFFFF`
-
----
-
-## ⚠️ Important Notes
-
-### Legal & Ethical
-- ✅ **Educational purposes only**
-- ✅ **Personal use and learning**
-- ❌ **Do NOT distribute commercially**
-- ❌ **Do NOT claim as original work**
-- ❌ **Respect original creators**
-
-### Version Compatibility
-- ✅ **Works with Mini Militia v4.0.42 only**
-- ❌ Newer versions removed LAN mode
-- ❌ Different versions have different memory addresses
-
-### Security
-- ✅ **Never commit keystores** (`.keystore`, `.jks`)
-- ✅ **Never share signing keys**
-- ✅ **Keep backups of originals**
-- ✅ **Test on emulator first**
-
----
+- Row Level Security (RLS) enabled on all tables
+- Authenticated users can only modify their own data
+- API keys are environment variables (never committed)
+- Privy handles secure Web3 authentication
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+**Game won't load:**
+- Check browser console for errors
+- Verify all environment variables are set
+- Check Supabase connection
 
-**"Java not found"**
-- Install Java JDK 11+ from [Adoptium](https://adoptium.net/)
+**Authentication issues:**
+- Verify Privy App ID is correct
+- Check if Privy dashboard shows your domain
+- Clear browser cache and cookies
 
-**"APK build failed"**
-- Check XML files for syntax errors
-- Ensure no special characters in paths
-- See platform-specific guides
-
-**"App won't install"**
-- Enable "Unknown Sources" in Android settings
-- Uninstall original Mini Militia first
-- Verify APK is signed: `jarsigner -verify yourapp.apk`
-
-**"App crashes on launch"**
-- Rebuild without binary patches first
-- Check all resources exist
-- Use `adb logcat` to see errors
-
-See platform-specific guides for more troubleshooting.
-
----
-
-## 📖 Learning Resources
-
-- **APKTool**: https://ibotpeaches.github.io/Apktool/
-- **Radare2**: https://book.rada.re/
-- **ARM Assembly**: https://developer.arm.com/documentation/
-- **Android Dev**: https://developer.android.com/
-
----
-
-## 🤝 Contributing
-
-This is an educational project. Feel free to:
-- Fork and experiment
-- Create issues for bugs
-- Submit pull requests
-- Share your modifications
-
----
-
-## 📜 Credits
-
-- **Original Game**: Appsomniacs Interactive
-- **Modding Techniques**: Reverse engineering community
-- **APKTool**: iBotPeaches
-- **Radare2**: pancake and contributors
-
----
+**Mobile controls not working:**
+- Ensure you're in landscape mode
+- Check if touch events are blocked
+- Try refreshing the page
 
 ## 📄 License
 
-This project is for **educational purposes only**.
+MIT License - Feel free to use for learning and personal projects
 
-The original Mini Militia game and all associated assets are property of their respective owners. This project is a fan-made modification for learning purposes.
+## 🙏 Credits
+
+- Inspired by Mini Militia (Doodle Army 2)
+- Built with Phaser 3 game engine
+- Authentication by Privy.io
+- Backend by Supabase
+
+## 🚧 Roadmap
+
+- [ ] More weapons and power-ups
+- [ ] Additional game modes (Team Deathmatch, CTF)
+- [ ] Custom map editor
+- [ ] Leaderboards
+- [ ] In-game chat
+- [ ] Tournament system
+- [ ] NFT weapon skins
 
 ---
 
-## 🎮 Let's Build!
-
-Ready to create Degen Militia? Choose your platform:
-
-- **Windows**: Start with [WINDOWS-SETUP.md](WINDOWS-SETUP.md)
-- **macOS/Linux**: Start with [DEGEN-MILITIA-GUIDE.md](DEGEN-MILITIA-GUIDE.md)
-- **Quick Start**: See [QUICKSTART.md](QUICKSTART.md)
-
----
-
-**🚀 From Mini to Degen - Let's get it! 🚀**
+**Made with 💜 by the Degen community**
