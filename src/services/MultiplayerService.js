@@ -49,7 +49,10 @@ export class MultiplayerService {
         console.log('Player joined:', key, newPresences);
         if (this.callbacks.onPlayerJoined) {
           newPresences.forEach(presence => {
-            this.callbacks.onPlayerJoined(presence);
+            // Don't create a sprite for yourself!
+            if (presence.playerId !== this.playerId) {
+              this.callbacks.onPlayerJoined(presence);
+            }
           });
         }
       })
