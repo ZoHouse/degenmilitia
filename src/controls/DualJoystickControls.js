@@ -92,25 +92,15 @@ export class DualJoystickControls {
     dirIndicators.lineBetween(x - 6, y, x + 6, y);
     dirIndicators.lineBetween(x, y - 6, x, y + 6);
     
-    // Touch tracking
-    let pointer = null;
-    let active = false;
+    // Touch tracking with multi-touch support
+    let pointerId = null;
     
     const isInArea = (px, py) => {
       return Phaser.Math.Distance.Between(px, py, x, y) < radius + 20;
     };
     
-    this.scene.input.on('pointerdown', (p) => {
-      if (!active && isInArea(p.x, p.y)) {
-        pointer = p;
-        active = true;
-        stick.setFillStyle(0x00FFFF, 1);
-        stick.setScale(1.1);
-      }
-    });
-    
-    this.scene.input.on('pointermove', (p) => {
-      if (!active || p.id !== (pointer?.id)) return;
+    const updateJoystick = (p) => {
+      if (p.id !== pointerId) return;
       
       const angle = Phaser.Math.Angle.Between(x, y, p.x, p.y);
       const distance = Math.min(
@@ -131,28 +121,45 @@ export class DualJoystickControls {
       this.input.moving = normalized > 0.12;
       
       // Jetpack when joystick is pushed upward (negative Y)
-      // Angle range: -90 degrees is straight up, check if within upper half
       const angleInDegrees = Phaser.Math.RadToDeg(angle);
       const isUpward = angleInDegrees < -45 && angleInDegrees > -135;
       this.input.jetpack = isUpward && normalized > 0.3;
+    };
+    
+    const resetJoystick = () => {
+      stick.x = x;
+      stick.y = y;
+      stickShadow.x = x + 1;
+      stickShadow.y = y + 1;
+      stickHighlight.x = x - 5;
+      stickHighlight.y = y - 5;
+      stick.setFillStyle(0x00F5FF, 0.75);
+      stick.setScale(1);
+      this.input.moveX = 0;
+      this.input.moveY = 0;
+      this.input.moving = false;
+      this.input.jetpack = false;
+    };
+    
+    this.scene.input.on('pointerdown', (p) => {
+      if (pointerId === null && isInArea(p.x, p.y)) {
+        pointerId = p.id;
+        stick.setFillStyle(0x00FFFF, 1);
+        stick.setScale(1.1);
+        updateJoystick(p);
+      }
+    });
+    
+    this.scene.input.on('pointermove', (p) => {
+      if (p.id === pointerId) {
+        updateJoystick(p);
+      }
     });
     
     this.scene.input.on('pointerup', (p) => {
-      if (p.id === (pointer?.id)) {
-        active = false;
-        pointer = null;
-        stick.x = x;
-        stick.y = y;
-        stickShadow.x = x + 1;
-        stickShadow.y = y + 1;
-        stickHighlight.x = x - 5;
-        stickHighlight.y = y - 5;
-        stick.setFillStyle(0x00F5FF, 0.75);
-        stick.setScale(1);
-        this.input.moveX = 0;
-        this.input.moveY = 0;
-        this.input.moving = false;
-        this.input.jetpack = false;
+      if (p.id === pointerId) {
+        pointerId = null;
+        resetJoystick();
       }
     });
     
@@ -220,26 +227,15 @@ export class DualJoystickControls {
       fontSize: '14px'
     }).setOrigin(0.5).setScrollFactor(0).setDepth(1003);
     
-    // Touch tracking
-    let pointer = null;
-    let active = false;
+    // Touch tracking with multi-touch support
+    let pointerId = null;
     
     const isInArea = (px, py) => {
       return Phaser.Math.Distance.Between(px, py, x, y) < radius + 20;
     };
     
-    this.scene.input.on('pointerdown', (p) => {
-      if (!active && isInArea(p.x, p.y)) {
-        pointer = p;
-        active = true;
-        stick.setFillStyle(0xFF0000, 1);
-        stick.setScale(1.1);
-        this.input.shooting = true;
-      }
-    });
-    
-    this.scene.input.on('pointermove', (p) => {
-      if (!active || p.id !== (pointer?.id)) return;
+    const updateJoystick = (p) => {
+      if (p.id !== pointerId) return;
       
       const angle = Phaser.Math.Angle.Between(x, y, p.x, p.y);
       const distance = Math.min(
@@ -263,24 +259,43 @@ export class DualJoystickControls {
       
       const normalized = distance / (radius - stickRadius - 5);
       this.input.shooting = normalized > 0.15;
+    };
+    
+    const resetJoystick = () => {
+      stick.x = x;
+      stick.y = y;
+      stickShadow.x = x + 1;
+      stickShadow.y = y + 1;
+      stickHighlight.x = x - 5;
+      stickHighlight.y = y - 5;
+      gunIcon.x = x;
+      gunIcon.y = y;
+      gunIcon.rotation = 0;
+      stick.setFillStyle(0xFF4444, 0.75);
+      stick.setScale(1);
+      this.input.shooting = false;
+    };
+    
+    this.scene.input.on('pointerdown', (p) => {
+      if (pointerId === null && isInArea(p.x, p.y)) {
+        pointerId = p.id;
+        stick.setFillStyle(0xFF0000, 1);
+        stick.setScale(1.1);
+        this.input.shooting = true;
+        updateJoystick(p);
+      }
+    });
+    
+    this.scene.input.on('pointermove', (p) => {
+      if (p.id === pointerId) {
+        updateJoystick(p);
+      }
     });
     
     this.scene.input.on('pointerup', (p) => {
-      if (p.id === (pointer?.id)) {
-        active = false;
-        pointer = null;
-        stick.x = x;
-        stick.y = y;
-        stickShadow.x = x + 1;
-        stickShadow.y = y + 1;
-        stickHighlight.x = x - 5;
-        stickHighlight.y = y - 5;
-        gunIcon.x = x;
-        gunIcon.y = y;
-        gunIcon.rotation = 0;
-        stick.setFillStyle(0xFF4444, 0.75);
-        stick.setScale(1);
-        this.input.shooting = false;
+      if (p.id === pointerId) {
+        pointerId = null;
+        resetJoystick();
       }
     });
     
